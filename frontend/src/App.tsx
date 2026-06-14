@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
-import { Todo, fetchTodos, createTodo, toggleTodo, deleteTodo } from "./api";
+import { Todo, fetchTodos, createTodo, toggleTodo, deleteTodo, getToken, clearToken } from "./api";
+import AuthPage from "./AuthPage";
 import "./App.css";
 
 export default function App() {
+  const [authed, setAuthed] = useState(() => !!getToken());
   const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    fetchTodos().then(setTodos);
-  }, []);
+    if (authed) fetchTodos().then(setTodos);
+  }, [authed]);
+
+  function handleLogout() {
+    clearToken();
+    setAuthed(false);
+    setTodos([]);
+  }
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -30,12 +38,21 @@ export default function App() {
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }
 
+  if (!authed) {
+    return <AuthPage onSuccess={() => setAuthed(true)} />;
+  }
+
   const completed = todos.filter((t) => t.completed).length;
 
   return (
     <div className="container">
-      <h1>My Tasks</h1>
-      <p className="subtitle">Stay organised, get things done.</p>
+      <div className="header-row">
+        <div>
+          <h1>My Tasks</h1>
+          <p className="subtitle">Stay organised, get things done.</p>
+        </div>
+        <button className="logout-btn" onClick={handleLogout}>Log out</button>
+      </div>
 
       <form className="add-form" onSubmit={handleAdd}>
         <div className="add-fields">
