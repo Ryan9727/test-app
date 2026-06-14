@@ -4,7 +4,8 @@ import "./App.css";
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [input, setInput] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     fetchTodos().then(setTodos);
@@ -12,10 +13,11 @@ export default function App() {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
-    if (!input.trim()) return;
-    const todo = await createTodo(input.trim());
+    if (!title.trim()) return;
+    const todo = await createTodo(title.trim(), description.trim());
     setTodos((prev) => [todo, ...prev]);
-    setInput("");
+    setTitle("");
+    setDescription("");
   }
 
   async function handleToggle(todo: Todo) {
@@ -36,11 +38,19 @@ export default function App() {
       <p className="subtitle">Stay organised, get things done.</p>
 
       <form className="add-form" onSubmit={handleAdd}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Add a new task..."
-        />
+        <div className="add-fields">
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Task title..."
+          />
+          <input
+            className="desc-input"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Description (optional)..."
+          />
+        </div>
         <button type="submit">+ Add</button>
       </form>
 
@@ -72,7 +82,12 @@ export default function App() {
                 className={`checkbox ${todo.completed ? "checked" : ""}`}
                 onClick={() => handleToggle(todo)}
               />
-              <span className="todo-title">{todo.title}</span>
+              <div className="todo-text">
+                <span className="todo-title">{todo.title}</span>
+                {todo.description && (
+                  <span className="todo-description">{todo.description}</span>
+                )}
+              </div>
               <button className="delete-btn" onClick={() => handleDelete(todo.id)}>✕</button>
             </li>
           ))}

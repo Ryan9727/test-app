@@ -12,9 +12,11 @@ def init_db():
             CREATE TABLE IF NOT EXISTS todos (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
+                description TEXT,
                 completed BOOLEAN NOT NULL DEFAULT FALSE
             )
         """)
+        cur.execute("ALTER TABLE todos ADD COLUMN IF NOT EXISTS description TEXT")
 
 
 @contextmanager

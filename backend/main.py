@@ -23,10 +23,12 @@ app.add_middleware(
 
 class TodoCreate(BaseModel):
     title: str
+    description: str | None = None
 
 
 class TodoUpdate(BaseModel):
     title: str | None = None
+    description: str | None = None
     completed: bool | None = None
 
 
@@ -41,7 +43,8 @@ def list_todos():
 def create_todo(body: TodoCreate):
     with get_cursor() as cur:
         cur.execute(
-            "INSERT INTO todos (title) VALUES (%s) RETURNING *", (body.title,)
+            "INSERT INTO todos (title, description) VALUES (%s, %s) RETURNING *",
+            (body.title, body.description),
         )
         return dict(cur.fetchone())
 
@@ -55,10 +58,11 @@ def update_todo(todo_id: int, body: TodoUpdate):
             raise HTTPException(status_code=404, detail="Not found")
         todo = dict(row)
         new_title = body.title if body.title is not None else todo["title"]
+        new_description = body.description if body.description is not None else todo["description"]
         new_completed = body.completed if body.completed is not None else todo["completed"]
         cur.execute(
-            "UPDATE todos SET title = %s, completed = %s WHERE id = %s RETURNING *",
-            (new_title, new_completed, todo_id),
+            "UPDATE todos SET title = %s, description = %s, completed = %s WHERE id = %s RETURNING *",
+            (new_title, new_description, new_completed, todo_id),
         )
         return dict(cur.fetchone())
 

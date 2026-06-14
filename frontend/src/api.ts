@@ -3,6 +3,7 @@ const BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 export interface Todo {
   id: number;
   title: string;
+  description: string | null;
   completed: boolean;
 }
 
@@ -11,11 +12,11 @@ export async function fetchTodos(): Promise<Todo[]> {
   return res.json();
 }
 
-export async function createTodo(title: string): Promise<Todo> {
+export async function createTodo(title: string, description: string): Promise<Todo> {
   const res = await fetch(`${BASE}/todos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title }),
+    body: JSON.stringify({ title, description: description || null }),
   });
   return res.json();
 }
