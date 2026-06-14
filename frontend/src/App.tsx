@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Todo, fetchTodos, createTodo, toggleTodo, deleteTodo } from "./api";
+import "./App.css";
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -13,7 +14,7 @@ export default function App() {
     e.preventDefault();
     if (!input.trim()) return;
     const todo = await createTodo(input.trim());
-    setTodos((prev) => [...prev, todo]);
+    setTodos((prev) => [todo, ...prev]);
     setInput("");
   }
 
@@ -27,36 +28,56 @@ export default function App() {
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }
 
+  const completed = todos.filter((t) => t.completed).length;
+
   return (
-    <div style={{ maxWidth: 480, margin: "60px auto", fontFamily: "sans-serif" }}>
-      <h1>Todos</h1>
-      <form onSubmit={handleAdd} style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+    <div className="container">
+      <h1>My Tasks</h1>
+      <p className="subtitle">Stay organised, get things done.</p>
+
+      <form className="add-form" onSubmit={handleAdd}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="New todo…"
-          style={{ flex: 1, padding: "6px 10px", fontSize: 16 }}
+          placeholder="Add a new task..."
         />
-        <button type="submit" style={{ padding: "6px 16px" }}>Add</button>
+        <button type="submit">+ Add</button>
       </form>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {todos.map((todo) => (
-          <li
-            key={todo.id}
-            style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}
-          >
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => handleToggle(todo)}
-            />
-            <span style={{ flex: 1, textDecoration: todo.completed ? "line-through" : "none" }}>
-              {todo.title}
-            </span>
-            <button onClick={() => handleDelete(todo.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+
+      <div className="stats">
+        <div className="stat">
+          <div className="stat-number">{todos.length}</div>
+          <div className="stat-label">Total</div>
+        </div>
+        <div className="stat">
+          <div className="stat-number">{todos.length - completed}</div>
+          <div className="stat-label">Remaining</div>
+        </div>
+        <div className="stat">
+          <div className="stat-number">{completed}</div>
+          <div className="stat-label">Completed</div>
+        </div>
+      </div>
+
+      {todos.length === 0 ? (
+        <div className="empty">
+          <div className="empty-icon">📋</div>
+          <p>No tasks yet. Add one above!</p>
+        </div>
+      ) : (
+        <ul className="todo-list" style={{ listStyle: "none", padding: 0 }}>
+          {todos.map((todo) => (
+            <li key={todo.id} className={`todo-item ${todo.completed ? "completed" : ""}`}>
+              <div
+                className={`checkbox ${todo.completed ? "checked" : ""}`}
+                onClick={() => handleToggle(todo)}
+              />
+              <span className="todo-title">{todo.title}</span>
+              <button className="delete-btn" onClick={() => handleDelete(todo.id)}>✕</button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
